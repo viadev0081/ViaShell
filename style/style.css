@@ -1,0 +1,241 @@
+/* === Переменные через цвета === */
+
+/* Окно панели */
+.panel-window {
+    background-color: transparent;
+}
+
+/* Основная панель */
+.panel {
+    background-color: rgba(24, 24, 37, 0.85);
+    border-radius: 16px;
+    padding: 8px 4px;
+    min-width: 44px;
+    border: 1px solid rgba(108, 112, 134, 0.3);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* === Группы модулей === */
+
+.modules-top {
+    padding: 4px 0;
+}
+
+.modules-center {
+    padding: 4px 0;
+}
+
+.modules-bottom {
+    padding: 4px 0;
+}
+
+/* === Базовый виджет === */
+
+.widget {
+    padding: 6px 4px;
+    border-radius: 12px;
+    margin: 2px 4px;
+    transition: all 200ms ease;
+    min-width: 32px;
+}
+
+.widget:hover {
+    background-color: rgba(49, 50, 68, 0.8);
+}
+
+/* === Иконки виджетов === */
+
+.widget-icon {
+    font-size: 16px;
+    color: #cdd6f4;
+    font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", monospace;
+}
+
+/* === Значения виджетов === */
+
+.widget-value {
+    font-size: 9px;
+    font-weight: 600;
+    color: #bac2de;
+    font-family: "JetBrainsMono Nerd Font", "Inter", "Cantarell", sans-serif;
+}
+
+/* === CPU === */
+
+.cpu .widget-icon {
+    color: #89b4fa; /* Blue */
+}
+
+.cpu.warning .widget-icon {
+    color: #fab387; /* Peach */
+}
+
+.cpu.critical .widget-icon {
+    color: #f38ba8; /* Red */
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* === Memory === */
+
+.memory .widget-icon {
+    color: #a6e3a1; /* Green */
+}
+
+.memory.warning .widget-icon {
+    color: #fab387; /* Peach */
+}
+
+.memory.critical .widget-icon {
+    color: #f38ba8; /* Red */
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* === Volume === */
+
+.volume .widget-icon {
+    color: #cba6f7; /* Mauve */
+}
+
+.volume.muted .widget-icon {
+    color: #6c7086; /* Overlay0 */
+}
+
+.volume.muted .widget-value {
+    color: #6c7086;
+}
+
+/* === Brightness === */
+
+.brightness .widget-icon {
+    color: #f9e2af; /* Yellow */
+}
+
+/* === Battery === */
+
+.battery .widget-icon {
+    color: #a6e3a1; /* Green */
+}
+
+.battery.charging .widget-icon {
+    color: #94e2d5; /* Teal */
+    animation: charging-glow 2s ease-in-out infinite;
+}
+
+.battery.warning .widget-icon {
+    color: #fab387; /* Peach */
+}
+
+.battery.critical .widget-icon {
+    color: #f38ba8; /* Red */
+    animation: pulse 1s ease-in-out infinite;
+}
+
+.battery.critical .widget-value {
+    color: #f38ba8;
+}
+
+/* === Clock === */
+
+.clock {
+    padding: 8px 4px;
+}
+
+.clock .time {
+    font-size: 14px;
+    font-weight: 800;
+    color: #cdd6f4;
+    font-family: "JetBrainsMono Nerd Font", "Inter", monospace;
+    letter-spacing: 1px;
+}
+
+.clock .date {
+    font-size: 8px;
+    font-weight: 500;
+    color: #9399b2; /* Overlay2 */
+    font-family: "Inter", "Cantarell", sans-serif;
+}
+
+/* === Workspace indicator === */
+
+.workspace-indicator {
+    font-size: 10px;
+    color: #89b4fa;
+    padding: 4px;
+}
+
+/* === Separator === */
+
+.separator {
+    background-color: rgba(108, 112, 134, 0.3);
+    min-height: 1px;
+    margin: 6px 8px;
+}
+
+/* === Vertical Level Bar === */
+
+.vertical-bar {
+    min-width: 4px;
+    min-height: 40px;
+    border-radius: 3px;
+}
+
+.vertical-bar trough {
+    background-color: rgba(49, 50, 68, 0.6);
+    border-radius: 3px;
+    min-width: 4px;
+}
+
+.vertical-bar block.filled {
+    border-radius: 3px;
+    min-width: 4px;
+}
+
+/* Level bar colors based on offset */
+.vertical-bar block.filled.low {
+    background-color: #a6e3a1;
+}
+
+.vertical-bar block.filled.medium {
+    background-color: #f9e2af;
+}
+
+.vertical-bar block.filled.high {
+    background-color: #fab387;
+}
+
+.vertical-bar block.filled.critical {
+    background-color: #f38ba8;
+}
+
+/* === Animations === */
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes charging-glow {
+    0%, 100% {
+        opacity: 1;
+        text-shadow: 0 0 4px rgba(148, 226, 213, 0.3);
+    }
+    50% {
+        opacity: 0.8;
+        text-shadow: 0 0 8px rgba(148, 226, 213, 0.6);
+    }
+}
+
+/* === Tooltip (если понадобится) === */
+
+tooltip {
+    background-color: rgba(24, 24, 37, 0.95);
+    border-radius: 8px;
+    border: 1px solid rgba(108, 112, 134, 0.3);
+    padding: 4px 8px;
+    color: #cdd6f4;
+    font-size: 11px;
+}
