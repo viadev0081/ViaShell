@@ -1,241 +1,944 @@
-/* === Переменные через цвета === */
+/* ============================================================
+ * ViaShell — Catppuccin Mocha / glass
+ * ============================================================ */
+@define-color base      #1e1e2e;
+@define-color mantle    #181825;
+@define-color crust     #11111b;
+@define-color text      #cdd6f4;
+@define-color subtext   #a6adc8;
+@define-color overlay   #6c7086;
+@define-color surface   #313244;
+@define-color surface2  #45475a;
+@define-color lavender  #b4befe;
+@define-color blue      #89b4fa;
+@define-color sapphire  #74c7ec;
+@define-color mauve     #cba6f7;
+@define-color pink      #f5c2e7;
+@define-color red       #f38ba8;
+@define-color peach     #fab387;
+@define-color yellow    #f9e2af;
+@define-color green     #a6e3a1;
+@define-color teal      #94e2d5;
 
-/* Окно панели */
-.panel-window {
+/* ------------------------------------------------------------
+ * Base
+ * ------------------------------------------------------------ */
+
+window,
+popover,
+tooltip {
+    font-family: "JetBrainsMono Nerd Font", "JetBrainsMono NL Nerd Font",
+                 "JetBrains Mono", monospace;
+    color: @text;
+}
+
+window.panel-window,
+window.screen-border-window {
+    background-color: solid;
+    background-image: none;
+}
+
+
+.border-canvas {
     background-color: transparent;
 }
 
-/* Основная панель */
-.panel {
-    background-color: rgba(24, 24, 37, 0.85);
-    border-radius: 16px;
+
+/* ------------------------------------------------------------
+ * Bar
+ * ------------------------------------------------------------ */
+.bar {
+    background-color: alpha(@mantle, 0.78);
+    background-image: linear-gradient(165deg,
+        alpha(@surface, 0.55) 0%,
+        alpha(@mantle, 0.10) 42%,
+        alpha(@crust, 0.25) 100%);
+
+
+    border: 1px solid alpha(@mauve, 0.22);
+    border-radius: 22px;
+
     padding: 8px 4px;
-    min-width: 44px;
-    border: 1px solid rgba(108, 112, 134, 0.3);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.50),
+                0 0 18px alpha(@mauve, 0.10),
+                inset 0 1px 0 alpha(@text, 0.06);
 }
 
-/* === Группы модулей === */
-
-.modules-top {
-    padding: 4px 0;
-}
-
-.modules-center {
-    padding: 4px 0;
-}
-
+.modules-top,
+.modules-center,
 .modules-bottom {
-    padding: 4px 0;
+    padding: 0;
 }
 
-/* === Базовый виджет === */
+.bar-divider {
+    background-color: alpha(@overlay, 0.28);
+    min-height: 1px;
+    margin: 2px 6px;
+}
 
-.widget {
-    padding: 6px 4px;
-    border-radius: 12px;
-    margin: 2px 4px;
+/* ------------------------------------------------------------
+ * Launcher logo
+ * ------------------------------------------------------------ */
+menubutton.logo-button > button {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    padding: 3px;
+    min-width: 34px;
+    min-height: 34px;
+    border-radius: 13px;
+    transition: background-color 180ms ease, box-shadow 180ms ease;
+}
+
+menubutton.logo-button > button:hover {
+    background-color: alpha(@mauve, 0.15);
+    box-shadow: 0 0 14px alpha(@mauve, 0.22);
+}
+
+menubutton.logo-button > button:active {
+    background-color: alpha(@mauve, 0.24);
+}
+
+.logo-glyph {
+    font-size: 23px;
+    text-shadow: 0 0 10px alpha(@mauve, 0.55);
+}
+
+/* ------------------------------------------------------------
+ * Workspaces
+ * ------------------------------------------------------------ */
+.workspaces {
+    padding: 2px 0 4px 0;
+}
+
+button.ws-button {
+    background-color: none;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    min-width: 42px;
+    min-height: 22px;
+    border-radius: 11px;
+    transition: background-color 160ms ease;
+}
+
+button.ws-button:hover {
+    background-color: alpha(@text, 0.06);
+}
+
+button.ws-button.active-workspace {
+    background-color: alpha(@lavender, 0.08);
+}
+
+.ws-dot {
+    border-radius: 99px;
+    background-color: alpha(@overlay, 0.45);
     transition: all 200ms ease;
-    min-width: 32px;
 }
 
-.widget:hover {
-    background-color: rgba(49, 50, 68, 0.8);
+.ws-dot.empty {
+    background-color: transparent;
+    border: 1.5px solid alpha(@overlay, 0.65);
 }
 
-/* === Иконки виджетов === */
+.ws-dot.occupied {
+    background-color: alpha(@text, 0.78);
+    border: none;
+}
 
-.widget-icon {
+.ws-dot.current {
+    background-color: @lavender;
+    border: none;
+    box-shadow: 0 0 10px alpha(@lavender, 0.75),
+                0 0 3px alpha(@text, 0.55);
+}
+
+/* ------------------------------------------------------------
+ * Clock
+ * ------------------------------------------------------------ */
+menubutton.clock-button > button {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    padding: 8px; /* 2px; */
+    border-radius: 16px;
+    transition: background-color 180ms ease;
+}
+
+menubutton.clock-button > button:hover {
+    background-color: alpha(@blue, 0.12);
+}
+
+.vs-clock-time {
     font-size: 16px;
-    color: #cdd6f4;
-    font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", monospace;
+    font-weight: 700;
+    color: @text;
+    letter-spacing: 0.2px;
 }
 
-/* === Значения виджетов === */
-
-.widget-value {
-    font-size: 9px;
-    font-weight: 600;
-    color: #bac2de;
-    font-family: "JetBrainsMono Nerd Font", "Inter", "Cantarell", sans-serif;
-}
-
-/* === CPU === */
-
-.cpu .widget-icon {
-    color: #89b4fa; /* Blue */
-}
-
-.cpu.warning .widget-icon {
-    color: #fab387; /* Peach */
-}
-
-.cpu.critical .widget-icon {
-    color: #f38ba8; /* Red */
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-/* === Memory === */
-
-.memory .widget-icon {
-    color: #a6e3a1; /* Green */
-}
-
-.memory.warning .widget-icon {
-    color: #fab387; /* Peach */
-}
-
-.memory.critical .widget-icon {
-    color: #f38ba8; /* Red */
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-/* === Volume === */
-
-.volume .widget-icon {
-    color: #cba6f7; /* Mauve */
-}
-
-.volume.muted .widget-icon {
-    color: #6c7086; /* Overlay0 */
-}
-
-.volume.muted .widget-value {
-    color: #6c7086;
-}
-
-/* === Brightness === */
-
-.brightness .widget-icon {
-    color: #f9e2af; /* Yellow */
-}
-
-/* === Battery === */
-
-.battery .widget-icon {
-    color: #a6e3a1; /* Green */
-}
-
-.battery.charging .widget-icon {
-    color: #94e2d5; /* Teal */
-    animation: charging-glow 2s ease-in-out infinite;
-}
-
-.battery.warning .widget-icon {
-    color: #fab387; /* Peach */
-}
-
-.battery.critical .widget-icon {
-    color: #f38ba8; /* Red */
-    animation: pulse 1s ease-in-out infinite;
-}
-
-.battery.critical .widget-value {
-    color: #f38ba8;
-}
-
-/* === Clock === */
-
-.clock {
-    padding: 8px 4px;
-}
-
-.clock .time {
-    font-size: 14px;
-    font-weight: 800;
-    color: #cdd6f4;
-    font-family: "JetBrainsMono Nerd Font", "Inter", monospace;
-    letter-spacing: 1px;
-}
-
-.clock .date {
+.vs-clock-date {
     font-size: 8px;
     font-weight: 500;
-    color: #9399b2; /* Overlay2 */
-    font-family: "Inter", "Cantarell", sans-serif;
+    color: @subtext;
+    letter-spacing: 0.1px;
 }
 
-/* === Workspace indicator === */
+/* ------------------------------------------------------------
+ * Popovers — shared
+ * ------------------------------------------------------------ */
+popover.vs-popover {
+    background-color: transparent;
+    background-image: none;
+    padding: 0;
+}
 
-.workspace-indicator {
+popover.vs-popover > contents {
+    background-color: alpha(@base, 0.97);
+    background-image: linear-gradient(160deg,
+        alpha(@surface, 0.55) 0%,
+        alpha(@base, 0.20) 45%,
+        alpha(@crust, 0.35) 100%);
+    border: 1px solid alpha(@mauve, 0.26);
+    border-radius: 20px;
+    padding: 0;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.58),
+                0 0 26px alpha(@mauve, 0.12),
+                inset 0 1px 0 alpha(@text, 0.07);
+}
+
+popover.vs-popover > arrow {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* ------------------------------------------------------------
+ * Calendar popover
+ * ------------------------------------------------------------ */
+.calendar-content {
+    padding: 16px;
+}
+
+.cal-header {
+    margin-bottom: 2px;
+}
+
+button.cal-nav {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    min-width: 30px;
+    min-height: 30px;
+    padding: 0;
+    border-radius: 10px;
+    color: @subtext;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 14px;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+button.cal-nav:hover {
+    background-color: alpha(@mauve, 0.16);
+    color: @text;
+}
+
+.cal-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: @text;
+    letter-spacing: 0.4px;
+}
+
+.cal-weekdays {
+    margin: 2px 0 4px 0;
+}
+
+.cal-weekday {
+    font-size: 9px;
+    font-weight: 700;
+    color: @overlay;
+    letter-spacing: 0.5px;
+}
+
+.cal-grid {
+    margin: 0;
+}
+
+button.cal-day {
+    background-color: transparent;
+    background-image: none;
+    border: 1px solid transparent;
+    box-shadow: none;
+    padding: 0;
+    min-width: 34px;
+    min-height: 32px;
+    border-radius: 10px;
+    color: @text;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+button.cal-day:hover {
+    background-color: alpha(@blue, 0.15);
+}
+
+button.cal-day.other-month {
+    color: alpha(@overlay, 0.85);
+}
+
+button.cal-day.today {
+    color: @peach;
+    border-color: alpha(@peach, 0.55);
+    font-weight: 700;
+}
+
+button.cal-day.selected {
+    background-color: alpha(@mauve, 0.30);
+    border-color: alpha(@mauve, 0.70);
+    color: @text;
+    font-weight: 700;
+    box-shadow: 0 0 12px alpha(@mauve, 0.25);
+}
+
+.cal-footer {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid alpha(@overlay, 0.20);
+}
+
+button.cal-today-button {
+    background-color: alpha(@surface, 0.75);
+    background-image: none;
+    border: 1px solid alpha(@overlay, 0.30);
+    box-shadow: none;
+    padding: 5px 12px;
+    border-radius: 10px;
     font-size: 10px;
-    color: #89b4fa;
-    padding: 4px;
+    font-weight: 600;
+    color: @subtext;
+    transition: all 150ms ease;
 }
 
-/* === Separator === */
-
-.separator {
-    background-color: rgba(108, 112, 134, 0.3);
-    min-height: 1px;
-    margin: 6px 8px;
+button.cal-today-button:hover {
+    background-color: alpha(@mauve, 0.20);
+    border-color: alpha(@mauve, 0.50);
+    color: @text;
 }
 
-/* === Vertical Level Bar === */
-
-.vertical-bar {
-    min-width: 4px;
-    min-height: 40px;
-    border-radius: 3px;
+.cal-footer-label {
+    font-size: 10px;
+    color: @subtext;
 }
 
-.vertical-bar trough {
-    background-color: rgba(49, 50, 68, 0.6);
-    border-radius: 3px;
-    min-width: 4px;
+/* ------------------------------------------------------------
+ * System summary button
+ * ------------------------------------------------------------ */
+menubutton.system-button > button {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    padding: 4px 1px;
+    border-radius: 18px;
+    transition: background-color 180ms ease;
 }
 
-.vertical-bar block.filled {
-    border-radius: 3px;
-    min-width: 4px;
+menubutton.system-button > button:hover {
+    background-color: alpha(@blue, 0.09);
 }
 
-/* Level bar colors based on offset */
-.vertical-bar block.filled.low {
-    background-color: #a6e3a1;
+.summary-grid {
+    padding: 0;
 }
 
-.vertical-bar block.filled.medium {
-    background-color: #f9e2af;
+.summary-row {
+    padding: 6px 0;
+    border-radius: 12px;
+    transition: background-color 160ms ease;
 }
 
-.vertical-bar block.filled.high {
-    background-color: #fab387;
+.summary-row:hover {
+    background-color: alpha(@text, 0.045);
 }
 
-.vertical-bar block.filled.critical {
-    background-color: #f38ba8;
+.summary-icon {
+    font-size: 16px;
+    color: @subtext;
 }
 
-/* === Animations === */
-
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
+.summary-value {
+    font-size: 9px;
+    font-weight: 700;
+    color: @text;
+    letter-spacing: 0.1px;
 }
 
-@keyframes charging-glow {
-    0%, 100% {
-        opacity: 1;
-        text-shadow: 0 0 4px rgba(148, 226, 213, 0.3);
-    }
-    50% {
-        opacity: 0.8;
-        text-shadow: 0 0 8px rgba(148, 226, 213, 0.6);
-    }
+.summary-row.cpu .summary-icon     { color: @blue; }
+.summary-row.memory .summary-icon  { color: @teal; }
+.summary-row.volume .summary-icon  { color: @green; }
+.summary-row.brightness .summary-icon { color: @yellow; }
+.summary-row.battery .summary-icon { color: @peach; }
+
+.summary-value.warn {
+    color: @yellow;
 }
 
-/* === Tooltip (если понадобится) === */
+.summary-value.critical {
+    color: @red;
+}
 
-tooltip {
-    background-color: rgba(24, 24, 37, 0.95);
-    border-radius: 8px;
-    border: 1px solid rgba(108, 112, 134, 0.3);
-    padding: 4px 8px;
-    color: #cdd6f4;
+/* ------------------------------------------------------------
+ * System popover
+ * ------------------------------------------------------------ */
+.system-content {
+    padding: 18px;
+}
+
+.popup-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: @text;
+    letter-spacing: 0.3px;
+}
+
+stackswitcher.vs-tabs {
+    background-color: alpha(@crust, 0.62);
+    border: 1px solid alpha(@surface, 0.85);
+    border-radius: 14px;
+    padding: 3px;
+}
+
+stackswitcher.vs-tabs > button {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 11px;
+    padding: 6px 7px;
+    min-height: 26px;
+    font-size: 10px;
+    font-weight: 600;
+    color: @subtext;
+    transition: all 160ms ease;
+}
+
+stackswitcher.vs-tabs > button:hover {
+    background-color: alpha(@text, 0.05);
+    color: @text;
+}
+
+stackswitcher.vs-tabs > button:checked {
+    background-color: alpha(@mauve, 0.24);
+    color: @text;
+    box-shadow: 0 0 12px alpha(@mauve, 0.18);
+}
+
+.tab-page {
+    padding: 2px 0 0 0;
+}
+
+/* Hero cards */
+.hero-card {
+    background-color: alpha(@surface, 0.42);
+    background-image: linear-gradient(150deg,
+        alpha(@surface2, 0.30) 0%,
+        alpha(@surface, 0.06) 100%);
+    border: 1px solid alpha(@overlay, 0.20);
+    border-radius: 16px;
+    padding: 14px;
+}
+
+.hero-icon {
+    font-size: 25px;
+    color: @lavender;
+    text-shadow: 0 0 12px alpha(@lavender, 0.30);
+}
+
+.hero-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: @subtext;
+    letter-spacing: 0.7px;
+}
+
+.hero-sub {
+    font-size: 9.5px;
+    color: @overlay;
+}
+
+.hero-value {
+    font-size: 21px;
+    font-weight: 700;
+    color: @text;
+}
+
+/* Progress bars */
+progressbar.vs-bar > trough {
+    background-color: alpha(@crust, 0.90);
+    border: none;
+    border-radius: 99px;
+    min-height: 7px;
+}
+
+progressbar.vs-bar > trough > progress {
+    background-color: transparent;
+    background-image: linear-gradient(90deg, @sapphire 0%, @blue 45%, @mauve 100%);
+    border: none;
+    border-radius: 99px;
+    min-height: 7px;
+}
+
+/* Meters */
+.section-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: @subtext;
+    letter-spacing: 0.6px;
+    margin-top: 2px;
+}
+
+.meter-row {
+    padding: 2px 0;
+}
+
+.meter-name {
+    font-size: 10px;
+    font-weight: 500;
+    color: @subtext;
+}
+
+.meter-value {
+    font-size: 10px;
+    font-weight: 700;
+    color: @text;
+}
+
+.detail-label {
+    font-size: 10px;
+    color: @overlay;
+}
+
+.core-scroll,
+.messages-scroll {
+    background-color: transparent;
+    border: none;
+}
+
+.core-scroll > viewport,
+.messages-scroll > viewport {
+    background-color: transparent;
+}
+
+/* Control cards */
+.control-card {
+    background-color: alpha(@surface, 0.35);
+    border: 1px solid alpha(@overlay, 0.18);
+    border-radius: 16px;
+    padding: 14px;
+}
+
+/* Sliders */
+scale.vs-slider {
+    padding: 6px 0;
+}
+
+scale.vs-slider > trough {
+    background-color: alpha(@crust, 0.92);
+    border: none;
+    border-radius: 99px;
+    min-height: 8px;
+}
+
+scale.vs-slider > trough > highlight {
+    background-color: transparent;
+    background-image: linear-gradient(90deg, @sapphire 0%, @mauve 100%);
+    border: none;
+    border-radius: 99px;
+}
+
+scale.vs-slider > trough > slider {
+    background-color: @text;
+    background-image: none;
+    border: 2px solid alpha(@mauve, 0.9);
+    border-radius: 99px;
+    min-width: 14px;
+    min-height: 14px;
+    margin: -5px;
+    box-shadow: 0 0 10px alpha(@mauve, 0.55);
+}
+
+scale.vs-slider:disabled > trough > slider {
+    background-color: @overlay;
+    border-color: alpha(@overlay, 0.5);
+    box-shadow: none;
+}
+
+/* Mute */
+button.mute-button {
+    background-color: alpha(@surface, 0.60);
+    background-image: none;
+    border: 1px solid alpha(@overlay, 0.28);
+    box-shadow: none;
+    border-radius: 12px;
+    padding: 8px 12px;
+    transition: all 160ms ease;
+}
+
+button.mute-button:hover {
+    background-color: alpha(@surface2, 0.70);
+    border-color: alpha(@mauve, 0.45);
+}
+
+button.mute-button.muted {
+    background-color: alpha(@red, 0.18);
+    border-color: alpha(@red, 0.50);
+    color: @red;
+}
+
+.button-icon {
+    font-size: 15px;
+}
+
+/* Power modes */
+.power-modes {
+    margin-top: 2px;
+}
+
+button.power-mode {
+    background-color: alpha(@surface, 0.45);
+    background-image: none;
+    border: 1px solid alpha(@overlay, 0.20);
+    box-shadow: none;
+    border-radius: 14px;
+    padding: 10px 4px;
+    transition: all 180ms ease;
+}
+
+button.power-mode:hover {
+    background-color: alpha(@surface2, 0.55);
+    border-color: alpha(@mauve, 0.35);
+}
+
+button.power-mode.active {
+    background-color: alpha(@mauve, 0.22);
+    border-color: alpha(@mauve, 0.65);
+    box-shadow: 0 0 16px alpha(@mauve, 0.20),
+                inset 0 1px 0 alpha(@text, 0.08);
+}
+
+.mode-icon {
+    font-size: 19px;
+    color: @subtext;
+}
+
+button.power-mode.active .mode-icon {
+    color: @mauve;
+}
+
+.mode-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: @subtext;
+}
+
+button.power-mode.active .mode-label {
+    color: @text;
+}
+
+/* ------------------------------------------------------------
+ * Launcher menu
+ * ------------------------------------------------------------ */
+.menu-content {
+    padding: 18px;
+}
+
+.menu-header {
+    padding: 2px 0 4px 0;
+}
+
+.avatar {
+    border-radius: 99px;
+    background-color: alpha(@surface, 0.85);
+    border: 2px solid alpha(@mauve, 0.45);
+    box-shadow: 0 0 16px alpha(@mauve, 0.22);
+}
+
+.avatar-image {
+    background-size: cover;
+    background-position: center;
+}
+
+.avatar-fallback {
+    background-image: linear-gradient(145deg, @mauve, @blue);
+    background-color: @mauve;
+}
+
+.avatar-initial {
+    font-size: 24px;
+    font-weight: 700;
+    color: @crust;
+}
+
+.user-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: @text;
+}
+
+.user-host {
+    font-size: 10px;
+    color: @overlay;
+}
+
+.distro-chip {
+    margin-top: 2px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    background-color: alpha(@surface, 0.60);
+    border: 1px solid alpha(@overlay, 0.22);
+}
+
+.distro-glyph {
+    font-size: 13px;
+}
+
+.distro-name {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: @subtext;
+}
+
+/* Media card */
+.media-card {
+    background-color: alpha(@surface, 0.38);
+    background-image: linear-gradient(140deg,
+        alpha(@surface2, 0.28) 0%,
+        alpha(@surface, 0.05) 100%);
+
+    border: 1px solid alpha(@overlay, 0.20);
+    border-radius: 16px;
+    padding: 12px;
+}
+
+.media-art {
+    border-radius: 12px;
+    background-color: alpha(@crust, 0.85);
+    border: 1px solid alpha(@overlay, 0.22);
+}
+
+.media-art-fallback {
+    font-size: 22px;
+    color: alpha(@mauve, 0.85);
+}
+
+.media-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: @text;
+}
+
+.media-artist {
+    font-size: 10px;
+    color: @subtext;
+}
+
+.media-controls {
+    margin-top: 2px;
+}
+
+button.media-button {
+    background-color: alpha(@crust, 0.55);
+    background-image: none;
+    border: 1px solid alpha(@overlay, 0.20);
+    box-shadow: none;
+    border-radius: 9px;
+    padding: 0;
+    min-width: 30px;
+    min-height: 26px;
+    color: @subtext;
+    font-family: "JetBrainsMono Nerd Font", monospace;
     font-size: 11px;
+    transition: all 150ms ease;
+}
+
+button.media-button:hover {
+    background-color: alpha(@mauve, 0.20);
+    border-color: alpha(@mauve, 0.45);
+    color: @text;
+}
+
+button.media-button:disabled {
+    color: alpha(@overlay, 0.6);
+    background-color: transparent;
+}
+
+/* Messages */
+.messages-section {
+    margin-top: 2px;
+}
+
+.messages-heading {
+    padding: 0 2px 2px 2px;
+}
+
+.section-icon {
+    font-size: 13px;
+    color: @mauve;
+}
+
+.message-count {
+    font-size: 9px;
+    font-weight: 700;
+    color: @subtext;
+    background-color: alpha(@surface2, 0.60);
+    border-radius: 99px;
+    padding: 1px 8px;
+    min-width: 18px;
+}
+
+.message-row {
+    background-color: alpha(@surface, 0.30);
+    border: 1px solid alpha(@overlay, 0.16);
+    border-left: 3px solid alpha(@blue, 0.55);
+    border-radius: 12px;
+    padding: 9px 11px;
+}
+
+.message-row.urgent {
+    border-left-color: @red;
+    background-color: alpha(@red, 0.08);
+}
+
+.message-app {
+    font-size: 9px;
+    font-weight: 700;
+    color: @blue;
+    letter-spacing: 0.3px;
+}
+
+.message-time {
+    font-size: 8.5px;
+    color: @overlay;
+}
+
+.message-summary {
+    font-size: 11px;
+    font-weight: 600;
+    color: @text;
+}
+
+.message-body {
+    font-size: 10px;
+    color: @subtext;
+}
+
+.empty-messages {
+    padding: 18px 0;
+}
+
+.empty-icon {
+    font-size: 26px;
+    color: alpha(@overlay, 0.65);
+}
+
+.empty-label {
+    font-size: 10px;
+    color: @overlay;
+}
+
+/* Power buttons */
+.power-grid {
+    margin-top: 2px;
+    padding-top: 10px;
+    border-top: 1px solid alpha(@overlay, 0.18);
+}
+
+button.power-action {
+    background-color: alpha(@surface, 0.40);
+    background-image: none;
+    border: 1px solid alpha(@overlay, 0.18);
+    box-shadow: none;
+    border-radius: 13px;
+    padding: 10px 2px;
+    transition: all 170ms ease;
+}
+
+button.power-action:hover {
+    background-color: alpha(@surface2, 0.58);
+    border-color: alpha(@overlay, 0.40);
+}
+
+button.power-action.power-action-off:hover {
+    background-color: alpha(@red, 0.20);
+    border-color: alpha(@red, 0.55);
+}
+
+button.power-action.power-action-reboot:hover {
+    background-color: alpha(@peach, 0.20);
+    border-color: alpha(@peach, 0.55);
+}
+
+button.power-action.power-action-logout:hover {
+    background-color: alpha(@blue, 0.20);
+    border-color: alpha(@blue, 0.55);
+}
+
+button.power-action.power-action-lock:hover {
+    background-color: alpha(@green, 0.20);
+    border-color: alpha(@green, 0.55);
+}
+
+.power-icon {
+    font-size: 17px;
+    color: @subtext;
+}
+
+button.power-action.power-action-off .power-icon     { color: @red; }
+button.power-action.power-action-reboot .power-icon  { color: @peach; }
+button.power-action.power-action-logout .power-icon  { color: @blue; }
+button.power-action.power-action-lock .power-icon    { color: @green; }
+
+.power-label {
+    font-size: 8.5px;
+    font-weight: 600;
+    color: @subtext;
+}
+
+/* ------------------------------------------------------------
+ * Scrollbars
+ * ------------------------------------------------------------ */
+scrollbar {
+    background-color: transparent;
+    border: none;
+}
+
+scrollbar > range > trough {
+    background-color: transparent;
+    border: none;
+}
+
+scrollbar > range > trough > slider {
+    background-color: alpha(@overlay, 0.55);
+    border: none;
+    border-radius: 99px;
+    min-width: 4px;
+    min-height: 4px;
+    margin: 2px;
+}
+
+scrollbar > range > trough > slider:hover {
+    background-color: alpha(@mauve, 0.65);
+}
+
+undershoot.top,
+undershoot.bottom,
+undershoot.left,
+undershoot.right {
+    background: none;
+    border: none;
 }
