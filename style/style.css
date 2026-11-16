@@ -1,6 +1,3 @@
-/* ============================================================
- * ViaShell — Catppuccin Mocha / glass
- * ============================================================ */
 @define-color base      #1e1e2e;
 @define-color mantle    #181825;
 @define-color crust     #11111b;
@@ -34,7 +31,7 @@ tooltip {
 
 window.panel-window,
 window.screen-border-window {
-    background-color: solid;
+    background-color: transparent;
     background-image: none;
 }
 
@@ -79,25 +76,28 @@ window.screen-border-window {
 /* ------------------------------------------------------------
  * Launcher logo
  * ------------------------------------------------------------ */
-menubutton.logo-button > button {
-    background-color: transparent;
+button.logo-button {
+    background-color: alpha(@surface, 0.35);
     background-image: none;
-    border: none;
-    box-shadow: none;
-    padding: 3px;
-    min-width: 34px;
-    min-height: 34px;
-    border-radius: 13px;
-    transition: background-color 180ms ease, box-shadow 180ms ease;
+    border: 1px solid alpha(@mauve, 0.18);
+    box-shadow: inset 0 1px 0 alpha(@text, 0.05);
+    padding: 0;
+    min-width: 40px;
+    min-height: 40px;
+    border-radius: 14px;
+    transition: background-color 180ms ease, border-color 180ms ease,
+                box-shadow 180ms ease;
 }
 
-menubutton.logo-button > button:hover {
-    background-color: alpha(@mauve, 0.15);
-    box-shadow: 0 0 14px alpha(@mauve, 0.22);
+button.logo-button:hover {
+    background-color: alpha(@mauve, 0.16);
+    border-color: alpha(@mauve, 0.40);
+    box-shadow: 0 0 16px alpha(@mauve, 0.22);
 }
 
-menubutton.logo-button > button:active {
+button.logo-button:checked {
     background-color: alpha(@mauve, 0.24);
+    border-color: alpha(@mauve, 0.55);
 }
 
 .logo-glyph {
@@ -113,13 +113,13 @@ menubutton.logo-button > button:active {
 }
 
 button.ws-button {
-    background-color: none;
+    background-color: transparent;
     background-image: none;
     border: none;
     box-shadow: none;
     padding: 0;
     min-width: 42px;
-    min-height: 22px;
+    min-height: 24px;
     border-radius: 11px;
     transition: background-color 160ms ease;
 }
@@ -158,18 +158,22 @@ button.ws-button.active-workspace {
 /* ------------------------------------------------------------
  * Clock
  * ------------------------------------------------------------ */
-menubutton.clock-button > button {
+button.clock-button {
     background-color: transparent;
     background-image: none;
     border: none;
     box-shadow: none;
-    padding: 8px; /* 2px; */
+    padding: 7px 2px;
     border-radius: 16px;
     transition: background-color 180ms ease;
 }
 
-menubutton.clock-button > button:hover {
+button.clock-button:hover {
     background-color: alpha(@blue, 0.12);
+}
+
+button.clock-button:checked {
+    background-color: alpha(@blue, 0.16);
 }
 
 .vs-clock-time {
@@ -338,7 +342,7 @@ button.cal-today-button:hover {
 /* ------------------------------------------------------------
  * System summary button
  * ------------------------------------------------------------ */
-menubutton.system-button > button {
+button.system-button {
     background-color: transparent;
     background-image: none;
     border: none;
@@ -348,8 +352,12 @@ menubutton.system-button > button {
     transition: background-color 180ms ease;
 }
 
-menubutton.system-button > button:hover {
+button.system-button:hover {
     background-color: alpha(@blue, 0.09);
+}
+
+button.system-button:checked {
+    background-color: alpha(@blue, 0.12);
 }
 
 .summary-grid {
@@ -357,7 +365,7 @@ menubutton.system-button > button:hover {
 }
 
 .summary-row {
-    padding: 6px 0;
+    padding: 3px 0;
     border-radius: 12px;
     transition: background-color 160ms ease;
 }
@@ -367,7 +375,7 @@ menubutton.system-button > button:hover {
 }
 
 .summary-icon {
-    font-size: 16px;
+    font-size: 15px;
     color: @subtext;
 }
 
@@ -907,6 +915,143 @@ button.power-action.power-action-lock .power-icon    { color: @green; }
     font-size: 8.5px;
     font-weight: 600;
     color: @subtext;
+}
+
+/* ------------------------------------------------------------
+ * Theme switcher
+ * ------------------------------------------------------------ */
+.theme-card {
+    background-color: alpha(@surface, 0.35);
+    border: 1px solid alpha(@overlay, 0.18);
+    border-radius: 14px;
+    padding: 8px 12px;
+}
+
+.theme-icon {
+    font-size: 15px;
+    color: @mauve;
+}
+
+.theme-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: @subtext;
+    letter-spacing: 0.4px;
+}
+
+dropdown.theme-dropdown > button {
+    background-color: alpha(@crust, 0.55);
+    background-image: none;
+    border: 1px solid alpha(@overlay, 0.22);
+    box-shadow: none;
+    border-radius: 9px;
+    padding: 4px 10px;
+    min-height: 22px;
+    font-size: 10px;
+    font-weight: 600;
+    color: @text;
+}
+
+dropdown.theme-dropdown > button:hover {
+    background-color: alpha(@surface2, 0.65);
+    border-color: alpha(@mauve, 0.40);
+}
+
+/* ------------------------------------------------------------
+ * Tray
+ * ------------------------------------------------------------ */
+.tray {
+    padding: 4px 0 0 0;
+    margin-top: 2px;
+    border-top: 1px solid alpha(@overlay, 0.18);
+}
+
+.tray-container {
+    padding: 4px 0 2px 0;
+}
+
+.tray-grid {
+    padding: 0;
+}
+
+button.tray-button {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    min-width: 24px;
+    min-height: 24px;
+    border-radius: 8px;
+    transition: background-color 150ms ease;
+}
+
+button.tray-button:hover {
+    background-color: alpha(@text, 0.10);
+}
+
+.tray-scroll,
+.tray-scroll > viewport {
+    background-color: transparent;
+    border: none;
+}
+
+/* ------------------------------------------------------------
+ * Tray menu
+ * ------------------------------------------------------------ */
+.tray-menu-content {
+    padding: 6px;
+    min-width: 190px;
+}
+
+button.tray-menu-item {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 9px;
+    padding: 5px 8px;
+    min-height: 26px;
+    color: @text;
+    font-size: 10.5px;
+    transition: background-color 140ms ease;
+}
+
+button.tray-menu-item:hover {
+    background-color: alpha(@mauve, 0.16);
+}
+
+button.tray-menu-item:disabled {
+    color: alpha(@overlay, 0.75);
+}
+
+.tray-menu-label {
+    font-size: 10.5px;
+    color: @text;
+}
+
+button.tray-menu-item:disabled .tray-menu-label {
+    color: alpha(@overlay, 0.75);
+}
+
+.tray-menu-check {
+    font-size: 11px;
+    color: @mauve;
+}
+
+.tray-menu-arrow {
+    font-size: 11px;
+    color: @overlay;
+}
+
+.tray-menu-separator {
+    background-color: alpha(@overlay, 0.22);
+    min-height: 1px;
+    margin: 4px 8px;
+}
+
+.tray-submenu {
+    padding-left: 2px;
 }
 
 /* ------------------------------------------------------------
