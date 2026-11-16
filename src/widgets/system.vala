@@ -761,7 +761,7 @@ namespace ViaShell {
 
     public class SystemWidget : Gtk.Box {
 
-        private Gtk.MenuButton button;
+        private PanelButton button;
         private Gtk.Label cpu_value;
         private Gtk.Label mem_value;
         private Gtk.Label vol_value;
@@ -783,21 +783,17 @@ namespace ViaShell {
             );
 
             this.set_valign (Gtk.Align.FILL);
-            this.set_vexpand (true);
+            this.set_vexpand (false);
 
-            button = new Gtk.MenuButton ();
-            button.add_css_class ("system-button");
-            button.set_direction (Gtk.ArrowType.RIGHT);
-            button.set_has_frame (false);
-            button.set_tooltip_text ("Мониторинг системы");
-            button.set_vexpand (true);
+            button = new PanelButton ("system-button", "Мониторинг системы");
+            button.set_vexpand (false);
             button.set_halign (Gtk.Align.FILL);
 
-            var grid = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            var grid = new Gtk.Box (Gtk.Orientation.VERTICAL, 2);
             grid.add_css_class ("summary-grid");
-            grid.set_homogeneous (true);
-            grid.set_valign (Gtk.Align.FILL);
-            grid.set_vexpand (true);
+            grid.set_homogeneous (false);
+            grid.set_valign (Gtk.Align.CENTER);
+            grid.set_vexpand (false);
 
             cpu_icon = add_summary_row (grid, Icons.CPU, "cpu");
             cpu_value = get_last_value ();
@@ -818,7 +814,7 @@ namespace ViaShell {
             this.append (button);
 
             system_popup = new SystemPopup ();
-            button.set_popover (system_popup);
+            button.set_panel_popover (system_popup);
 
             update_summary ();
             GLib.Timeout.add_seconds (2, () => {
@@ -828,6 +824,10 @@ namespace ViaShell {
         }
 
         private Gtk.Label last_value;
+
+        public void open_menu () {
+            button.set_active (true);
+        }
 
         private Gtk.Label get_last_value () {
             return last_value;
