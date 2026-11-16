@@ -62,6 +62,8 @@ namespace ViaShell {
         public const uint32 ACCOUNT = 0xF0009;          // md-account_circle
         public const uint32 CHEVRON_LEFT = 0xF0141;     // md-chevron_left
         public const uint32 CHEVRON_RIGHT = 0xF0142;    // md-chevron_right
+        public const uint32 CHECK = 0xF012C;             // md-check
+        public const uint32 PALETTE = 0xF03D8;           // md-palette
 
         // Distributions
         public const uint32 DISTRO_VOID = 0xF32E;       // linux-void
