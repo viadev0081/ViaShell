@@ -7,6 +7,8 @@ sources = files(
     'utils/hyprland.vala',
     'utils/media.vala',
     'utils/notifications.vala',
+    'utils/theme.vala',
+    'widgets/panel_button.vala',
     'widgets/workspaces.vala',
     'widgets/calendar.vala',
     'widgets/clock.vala',
