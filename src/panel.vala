@@ -6,7 +6,7 @@ namespace ViaShell {
     public class Panel : Gtk.Window {
 
         private Gtk.Box bar;
-        private Gtk.MenuButton logo_button;
+        private PanelButton logo_button;
         private WorkspacesWidget workspaces;
         private SystemWidget system_widget;
         private ClockWidget clock_widget;
@@ -16,7 +16,8 @@ namespace ViaShell {
             Gdk.Monitor monitor,
             Distro distro,
             MediaService media,
-            NotificationService notifications
+            NotificationService notifications,
+            ThemeManager themes
         ) {
             Object (application: app);
 
@@ -44,18 +45,48 @@ namespace ViaShell {
             // Эксклюзивная зона только у панели
             GtkLayerShell.auto_exclusive_zone_enable (this);
 
-            setup_ui (distro, media, notifications, monitor);
+            setup_ui (distro, media, notifications, themes, monitor);
 
-            GLib.Timeout.add (2000, () => {
-                logo_button.popup ();
-                return GLib.Source.REMOVE;
-            });
+            string? debug = GLib.Environment.get_variable ("VIASHELL_DEBUG");
+            if (debug == "menu") {
+                GLib.Timeout.add (1200, () => {
+                    logo_button.set_active (true);
+
+                    return GLib.Source.REMOVE;
+                });
+            }
+            else if (debug == "calendar") {
+                GLib.Timeout.add (1200, () => {
+                    clock_widget.open_menu ();
+
+                    return GLib.Source.REMOVE;
+                });
+            }
+            else if (debug == "system") {
+                GLib.Timeout.add (1200, () => {
+                    system_widget.open_menu ();
+
+                    return GLib.Source.REMOVE;
+                });
+            }
+            else if (debug == "theme") {
+                GLib.Timeout.add (1200, () => {
+                    logo_button.set_active (true);
+                    GLib.Timeout.add (1000, () => {
+                        themes.set_theme (1);
+                        return GLib.Source.REMOVE;
+                    });
+
+                    return GLib.Source.REMOVE;
+                });
+            }
         }
 
         private void setup_ui (
             Distro distro,
             MediaService media,
             NotificationService notifications,
+            ThemeManager themes,
             Gdk.Monitor monitor
         ) {
             // Фиксированная ширина вертикальной панели
@@ -69,12 +100,13 @@ namespace ViaShell {
             bar.set_size_request (64, -1);
 
             // === Верхняя группа: логотип дистрибутива + рабочие столы ===
-            var top_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 10);
+            var top_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 8);
             top_box.add_css_class ("modules-top");
             top_box.set_valign (Gtk.Align.START);
             top_box.set_vexpand (false);
+            top_box.set_halign (Gtk.Align.FILL);
 
-            logo_button = build_logo_button (distro, media, notifications);
+            logo_button = build_logo_button (distro, media, notifications, themes);
             top_box.append (logo_button);
 
             var divider = new Gtk.Separator (Gtk.Orientation.HORIZONTAL);
@@ -91,11 +123,11 @@ namespace ViaShell {
             center_box.set_vexpand (true);
 
             system_widget = new SystemWidget ();
-            system_widget.set_vexpand (true);
+            system_widget.set_vexpand (false);
             center_box.append (system_widget);
 
-            // === Нижняя группа: часы + календарь ===
-            var bottom_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            // === Нижняя группа: трей + часы ===
+            var bottom_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 8);
             bottom_box.add_css_class ("modules-bottom");
             bottom_box.set_valign (Gtk.Align.END);
             bottom_box.set_vexpand (false);
@@ -108,33 +140,15 @@ namespace ViaShell {
             bar.append (bottom_box);
 
             this.set_child (bar);
-
-            GLib.Timeout.add (1600, () => {
-                int tm, tn, cm, cn, bm, bn, wm, wn;
-                top_box.measure (Gtk.Orientation.VERTICAL, -1, out tm, out tn, null, null);
-                center_box.measure (Gtk.Orientation.VERTICAL, -1, out cm, out cn, null, null);
-                bottom_box.measure (Gtk.Orientation.VERTICAL, -1, out bm, out bn, null, null);
-                workspaces.measure (Gtk.Orientation.VERTICAL, -1, out wm, out wn, null, null);
-                stderr.printf ("DBG2 bar h=%d top %d min=%d nat=%d center %d min=%d nat=%d bottom %d min=%d nat=%d ws %d min=%d nat=%d\n",
-                    bar.get_height (),
-                    top_box.get_height (), tm, tn,
-                    center_box.get_height (), cm, cn,
-                    bottom_box.get_height (), bm, bn,
-                    workspaces.get_height (), wm, wn);
-                return GLib.Source.REMOVE;
-            });
         }
 
-        private Gtk.MenuButton build_logo_button (
+        private PanelButton build_logo_button (
             Distro distro,
             MediaService media,
-            NotificationService notifications
+            NotificationService notifications,
+            ThemeManager themes
         ) {
-            var button = new Gtk.MenuButton ();
-            button.add_css_class ("logo-button");
-            button.set_has_frame (false);
-            button.set_direction (Gtk.ArrowType.RIGHT);
-            button.set_tooltip_text (distro.name);
+            var button = new PanelButton ("logo-button", distro.name);
 
             var logo = new Gtk.Label ("");
             logo.add_css_class ("logo-glyph");
@@ -149,8 +163,8 @@ namespace ViaShell {
 
             button.set_child (logo);
 
-            var menu = new LauncherMenu (distro, media, notifications);
-            button.set_popover (menu);
+            var menu = new LauncherMenu (distro, media, notifications, themes);
+            button.set_panel_popover (menu);
 
             return button;
         }
