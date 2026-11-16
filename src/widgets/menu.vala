@@ -7,9 +7,11 @@ namespace ViaShell {
         private Distro distro;
         private MediaService media;
         private NotificationService notifications;
+        private ThemeManager themes;
 
         private string user_name;
         private string display_name;
+        private bool theme_syncing = false;
 
         private Gtk.Label media_title;
         private Gtk.Label media_artist;
@@ -26,11 +28,13 @@ namespace ViaShell {
         public LauncherMenu (
             Distro distro,
             MediaService media,
-            NotificationService notifications
+            NotificationService notifications,
+            ThemeManager themes
         ) {
             this.distro = distro;
             this.media = media;
             this.notifications = notifications;
+            this.themes = themes;
 
             string? user = GLib.Environment.get_user_name ();
             user_name = user != null ? user : "user";
@@ -53,6 +57,7 @@ namespace ViaShell {
             root.set_size_request (400, 560);
 
             root.append (build_header ());
+            root.append (build_theme_row ());
             root.append (build_media_card ());
             root.append (build_messages ());
             root.append (build_power_grid ());
@@ -127,6 +132,51 @@ namespace ViaShell {
 
             header.append (info);
             return header;
+        }
+
+        /* ------------------------------------------------------------------ */
+        /*  Тема оформления                                                   */
+        /* ------------------------------------------------------------------ */
+        private Gtk.Widget build_theme_row () {
+            var card = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
+            card.add_css_class ("theme-card");
+            card.set_valign (Gtk.Align.CENTER);
+
+            var icon = new Gtk.Label (Icons.get (Icons.PALETTE));
+            icon.add_css_class ("theme-icon");
+            icon.set_valign (Gtk.Align.CENTER);
+
+            var label = new Gtk.Label ("Тема");
+            label.add_css_class ("theme-label");
+            label.set_hexpand (true);
+            label.set_halign (Gtk.Align.START);
+
+            var dropdown = new Gtk.DropDown.from_strings (themes.labels);
+            dropdown.add_css_class ("theme-dropdown");
+            dropdown.set_selected ((uint) themes.current);
+            dropdown.set_valign (Gtk.Align.CENTER);
+            dropdown.notify["selected"].connect (() => {
+                if (theme_syncing) {
+                    return;
+                }
+                themes.set_theme ((int) dropdown.get_selected ());
+            });
+
+            themes.changed.connect (() => {
+                if (theme_syncing) {
+                    return;
+                }
+
+                theme_syncing = true;
+                dropdown.set_selected ((uint) themes.current);
+                theme_syncing = false;
+            });
+
+            card.append (icon);
+            card.append (label);
+            card.append (dropdown);
+
+            return card;
         }
 
         private Gtk.Widget build_avatar () {
