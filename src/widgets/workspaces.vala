@@ -2,6 +2,31 @@ using Gtk;
 
 namespace ViaShell {
 
+    private class WsButton : Gtk.Button {
+
+        public const int ROW_HEIGHT = 24;
+
+        public override void measure (
+            Gtk.Orientation orientation,
+            int for_size,
+            out int minimum,
+            out int natural,
+            out int minimum_baseline,
+            out int natural_baseline
+        ) {
+            base.measure (
+                orientation, for_size,
+                out minimum, out natural,
+                out minimum_baseline, out natural_baseline
+            );
+
+            if (orientation == Gtk.Orientation.VERTICAL) {
+                minimum = ROW_HEIGHT;
+                natural = ROW_HEIGHT;
+            }
+        }
+    }
+
     public class WorkspacesWidget : Gtk.Box {
 
         private string? monitor_name;
@@ -23,15 +48,6 @@ namespace ViaShell {
 
             build_buttons (Hyprland.is_niri_available () ? 3 : 10);
             refresh ();
-
-            GLib.Timeout.add (1500, () => {
-                int bm, bn;
-                buttons[0].measure (Gtk.Orientation.VERTICAL, -1, out bm, out bn, null, null);
-                stderr.printf ("DBG ws box h=%d btn h=%d w=%d min=%d nat=%d cnt=%d\n",
-                    this.get_height (), buttons[0].get_height (),
-                    buttons[0].get_width (), bm, bn, buttons.length);
-                return GLib.Source.REMOVE;
-            });
 
             timer_id = GLib.Timeout.add (800, () => {
                 refresh ();
@@ -69,12 +85,13 @@ namespace ViaShell {
             dot.set_halign (Gtk.Align.CENTER);
             dot.set_valign (Gtk.Align.CENTER);
 
-            var button = new Gtk.Button ();
+            var button = new WsButton ();
             button.add_css_class ("ws-button");
             button.set_child (dot);
             button.set_tooltip_text ("Рабочий стол %d".printf (position + 1));
-            button.set_size_request (42, 22);
+            button.set_size_request (42, WsButton.ROW_HEIGHT);
             button.set_halign (Gtk.Align.CENTER);
+            button.set_valign (Gtk.Align.CENTER);
 
             int index = position;
             button.clicked.connect (() => {
