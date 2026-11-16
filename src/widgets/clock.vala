@@ -4,7 +4,7 @@ namespace ViaShell {
 
     public class ClockWidget : Gtk.Box {
 
-        private Gtk.MenuButton button;
+        private PanelButton button;
         private Gtk.Label time_label;
         private Gtk.Label date_label;
         private CalendarWidget calendar;
@@ -15,17 +15,15 @@ namespace ViaShell {
                 spacing: 0
             );
 
-            button = new Gtk.MenuButton ();
-            button.add_css_class ("clock-button");
-            button.set_direction (Gtk.ArrowType.RIGHT);
-            button.set_has_frame (false);
-            button.set_tooltip_text ("Календарь");
+            button = new PanelButton ("clock-button", "Календарь");
             button.set_hexpand (true);
             button.set_halign (Gtk.Align.FILL);
+            button.set_valign (Gtk.Align.CENTER);
 
             var box = new Gtk.Box (Gtk.Orientation.VERTICAL, 1);
             box.add_css_class ("clock-content");
             box.set_halign (Gtk.Align.CENTER);
+            box.set_valign (Gtk.Align.CENTER);
 
             time_label = new Gtk.Label ("");
             time_label.add_css_class ("vs-clock-time");
@@ -45,13 +43,11 @@ namespace ViaShell {
             var popover = new Gtk.Popover ();
             popover.add_css_class ("vs-popover");
             popover.add_css_class ("calendar-popover");
-            popover.set_has_arrow (false);
-            popover.set_position (Gtk.PositionType.RIGHT);
             popover.set_child (calendar);
             popover.show.connect (() => {
                 calendar.reset_to_today ();
             });
-            button.set_popover (popover);
+            button.set_panel_popover (popover);
 
             this.append (button);
 
@@ -60,6 +56,10 @@ namespace ViaShell {
                 update_time ();
                 return GLib.Source.CONTINUE;
             });
+        }
+
+        public void open_menu () {
+            button.set_active (true);
         }
 
         private void update_time () {
