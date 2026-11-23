@@ -45,20 +45,20 @@ window.screen-border-window {
  * Bar
  * ------------------------------------------------------------ */
 .bar {
-    background-color: alpha(@mantle, 0.78);
+    background-color: alpha(@base, 0.88);
     background-image: linear-gradient(165deg,
-        alpha(@surface, 0.55) 0%,
-        alpha(@mantle, 0.10) 42%,
-        alpha(@crust, 0.25) 100%);
+        alpha(@surface, 0.95) 0%,
+        alpha(@base, 0.92) 42%,
+        alpha(@base, 0.85) 100%);
 
 
-    border: 1px solid alpha(@mauve, 0.22);
+    border: 1px solid alpha(@mauve, 0.82);
     border-radius: 22px;
 
     padding: 8px 4px;
-    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.50),
-                0 0 18px alpha(@mauve, 0.10),
-                inset 0 1px 0 alpha(@text, 0.06);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.90),
+                /* 0 0 18px alpha(@mauve, 0.80), */
+                inset 0 1px 0 alpha(@text, 0.86);
 }
 
 .modules-top,
