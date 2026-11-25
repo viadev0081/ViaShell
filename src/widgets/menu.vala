@@ -8,6 +8,7 @@ namespace ViaShell {
         private MediaService media;
         private NotificationService notifications;
         private ThemeManager themes;
+        private IniConfig config;
 
         private string user_name;
         private string display_name;
@@ -25,16 +26,31 @@ namespace ViaShell {
         private Gtk.Label message_count;
         private Gtk.ScrolledWindow messages_scroll;
 
-        public LauncherMenu (
+        /* Буфер обмена */
+        private Gtk.Label clipboard_text;
+        private uint clipboard_timer = 0;
+
+        /* Wi-Fi */
+        private Gtk.Label wifi_ssid;
+        private Gtk.Label wifi_signal;
+        private Gtk.Label wifi_internet;
+        private Gtk.Button wifi_toggle;
+
+        /* Рабочие столы в меню */
+        private Gtk.Box? workspaces_dots_menu;
+
+    public LauncherMenu (
             Distro distro,
             MediaService media,
             NotificationService notifications,
-            ThemeManager themes
+            ThemeManager themes,
+            IniConfig config
         ) {
             this.distro = distro;
             this.media = media;
             this.notifications = notifications;
             this.themes = themes;
+            this.config = config;
 
             string? user = GLib.Environment.get_user_name ();
             user_name = user != null ? user : "user";
@@ -54,21 +70,85 @@ namespace ViaShell {
 
             var root = new Gtk.Box (Gtk.Orientation.VERTICAL, 10);
             root.add_css_class ("menu-content");
-            root.set_size_request (400, 560);
+            root.set_size_request (400, 400);
+            root.set_vexpand (true);
 
             root.append (build_header ());
-            root.append (build_theme_row ());
-            root.append (build_media_card ());
-            root.append (build_messages ());
-            root.append (build_power_grid ());
+            if (config.get_bool ("menu", "theme", true)) {
+                root.append (build_theme_row ());
+            }
+            if (config.get_bool ("menu", "media", true)) {
+                root.append (build_media_card ());
+            }
+            if (config.get_bool ("menu", "workspaces", true)) {
+                root.append (build_workspaces_menu ());
+            }
+            if (config.get_bool ("menu", "wifi", true)) {
+                root.append (build_wifi ());
+            }
+            if (config.get_bool ("menu", "clipboard", true)) {
+                root.append (build_clipboard ());
+            }
+            if (config.get_bool ("menu", "messages", true)) {
+                root.append (build_messages ());
+            }
+            if (config.get_bool ("menu", "power", true)) {
+                root.append (build_power_grid ());
+            }
 
-            this.set_child (root);
+            var scroller = new Gtk.ScrolledWindow ();
+            scroller.add_css_class ("menu-scroller");
+            scroller.set_policy (Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
+            scroller.set_vexpand (true);
+            // Gtk.Popover в GTK 4.24 подгоняет высоту под минимальную высоту
+            // содержимого, поэтому задаём её явно на скроллере.
+            scroller.set_min_content_height (760);
+            scroller.set_child (root);
+
+            this.set_child (scroller);
+
+            if (GLib.Environment.get_variable ("VIASHELL_DEBUG") == "size") {
+                int min_h, nat_h, min_w, nat_w;
+                this.measure (Gtk.Orientation.VERTICAL, -1, out min_h, out nat_h, null, null);
+                this.measure (Gtk.Orientation.HORIZONTAL, -1, out min_w, out nat_w, null, null);
+                stdout.printf ("menu-measure: min=%dx%d nat=%dx%d\n", min_w, min_h, nat_w, nat_h);
+                stdout.flush ();
+            }
 
             this.show.connect (() => {
+                if (GLib.Environment.get_variable ("VIASHELL_DEBUG") == "menu") {
+                    GLib.Timeout.add (600, () => {
+                        stdout.printf ("menu-size: popover=%dx%d scroller=%dx%d content=%dx%d\n",
+                            this.get_width (), this.get_height (),
+                            scroller.get_width (), scroller.get_height (),
+                            root.get_width (), root.get_height ());
+                        return GLib.Source.REMOVE;
+                    });
+                }
                 media.refresh ();
                 notifications.refresh ();
                 update_media ();
                 refresh_messages ();
+                if (config.get_bool ("menu", "wifi", true)) {
+                    refresh_wifi ();
+                }
+                if (config.get_bool ("menu", "clipboard", true)) {
+                    read_clipboard ();
+                    clipboard_timer = GLib.Timeout.add_seconds (2, () => {
+                        read_clipboard ();
+                        return GLib.Source.CONTINUE;
+                    });
+                }
+                if (workspaces_dots_menu != null) {
+                    refresh_workspaces_menu (workspaces_dots_menu);
+                }
+            });
+
+            this.hide.connect (() => {
+                if (clipboard_timer != 0) {
+                    GLib.Source.remove (clipboard_timer);
+                    clipboard_timer = 0;
+                }
             });
 
             media.changed.connect (() => {
@@ -81,47 +161,67 @@ namespace ViaShell {
 
             update_media ();
             refresh_messages ();
+            if (config.get_bool ("menu", "wifi", true)) {
+                refresh_wifi ();
+            }
+            if (config.get_bool ("menu", "clipboard", true)) {
+                read_clipboard ();
+            }
+            if (workspaces_dots_menu != null) {
+                refresh_workspaces_menu (workspaces_dots_menu);
+            }
         }
 
         /* ------------------------------------------------------------------ */
-        /*  Шапка                                                             */
+        /*  Шапка (логотип оцентрировано)                                     */
         /* ------------------------------------------------------------------ */
         private Gtk.Widget build_header () {
-            var header = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 14);
+            var header = new Gtk.Box (Gtk.Orientation.VERTICAL, 10);
             header.add_css_class ("menu-header");
+            header.set_halign (Gtk.Align.CENTER);
+            header.set_valign (Gtk.Align.START);
 
-            header.append (build_avatar ());
+            // Логотип/аватура — по центру меню, а не прижатый к правому краю
+            var avatar_row = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+            avatar_row.set_hexpand (true);
+            avatar_row.set_halign (Gtk.Align.FILL);
+            avatar_row.append (build_avatar ());
+
+            header.append (avatar_row);
 
             var info = new Gtk.Box (Gtk.Orientation.VERTICAL, 3);
-            info.set_hexpand (true);
+            info.set_halign (Gtk.Align.CENTER);
             info.set_valign (Gtk.Align.CENTER);
 
             var name_label = new Gtk.Label (display_name);
             name_label.add_css_class ("user-name");
-            name_label.set_halign (Gtk.Align.START);
+            name_label.set_halign (Gtk.Align.CENTER);
             name_label.set_ellipsize (Pango.EllipsizeMode.END);
+            name_label.set_max_width_chars (26);
 
             var host_label = new Gtk.Label ("@" + GLib.Environment.get_host_name ());
             host_label.add_css_class ("user-host");
-            host_label.set_halign (Gtk.Align.START);
+            host_label.set_halign (Gtk.Align.CENTER);
 
             var chip = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6);
             chip.add_css_class ("distro-chip");
-            chip.set_halign (Gtk.Align.START);
+            chip.set_halign (Gtk.Align.CENTER);
             chip.set_tooltip_text (distro.name);
 
             var distro_icon = new Gtk.Label ("");
             distro_icon.add_css_class ("distro-glyph");
 
+            // Акцентный цвет текущей темы, а не хардкод из catppuccin
             distro_icon.set_markup (
                 "<span foreground='%s'>%s</span>".printf (
-                    distro.colour, GLib.Markup.escape_text (Icons.get (distro.glyph))
+                    themes.accent_color (), GLib.Markup.escape_text (Icons.get (distro.glyph))
                 )
             );
 
             var distro_name = new Gtk.Label (distro.name);
             distro_name.add_css_class ("distro-name");
             distro_name.set_ellipsize (Pango.EllipsizeMode.END);
+            distro_name.set_max_width_chars (20);
 
             chip.append (distro_icon);
             chip.append (distro_name);
@@ -383,6 +483,300 @@ namespace ViaShell {
         }
 
         /* ------------------------------------------------------------------ */
+        /*  Рабочие столы в меню                                              */
+        /* ------------------------------------------------------------------ */
+        private Gtk.Widget build_workspaces_menu () {
+            var section = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
+            section.add_css_class ("menu-workspaces");
+
+            var heading = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 8);
+            heading.add_css_class ("menu-section-heading");
+
+            var icon = new Gtk.Label (Icons.get (Icons.ACCOUNT));
+            icon.add_css_class ("section-icon");
+
+            var title = new Gtk.Label ("Рабочие столы");
+            title.add_css_class ("section-title");
+            title.set_halign (Gtk.Align.START);
+            title.set_hexpand (true);
+
+            heading.append (icon);
+            heading.append (title);
+            section.append (heading);
+
+            var dots_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 2);
+            dots_box.add_css_class ("menu-workspaces-dots");
+            dots_box.set_halign (Gtk.Align.CENTER);
+
+            section.append (dots_box);
+
+            workspaces_dots_menu = dots_box;
+            refresh_workspaces_menu (dots_box);
+
+            var controller = new Gtk.EventControllerScroll (
+                Gtk.EventControllerScrollFlags.VERTICAL
+            );
+            controller.scroll.connect ((dx, dy) => {
+                refresh_workspaces_menu (dots_box);
+                return true;
+            });
+            section.add_controller (controller);
+
+            return section;
+        }
+
+        private void refresh_workspaces_menu (Gtk.Box dots_box) {
+            if (!Hyprland.is_available () && !Sway.is_available ()) {
+                return;
+            }
+
+            bool use_sway = Sway.is_available ();
+            WorkspaceInfo[] list = use_sway
+                ? Sway.get_workspaces (null, 10)
+                : Hyprland.get_workspaces (null, 10);
+
+            clear_box (dots_box);
+
+            foreach (var ws in list) {
+                var dot = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+                dot.add_css_class ("ws-dot");
+                dot.set_size_request (10, 10);
+                dot.set_halign (Gtk.Align.CENTER);
+                dot.set_valign (Gtk.Align.CENTER);
+
+                if (ws.active) {
+                    dot.add_css_class ("current");
+                    dot.set_size_request (22, 7);
+                } else if (ws.occupied) {
+                    dot.add_css_class ("occupied");
+                } else {
+                    dot.add_css_class ("empty");
+                }
+
+                var button = new Gtk.Button ();
+                button.add_css_class ("menu-ws-button");
+                button.set_child (dot);
+                button.set_size_request (30, 24);
+                button.set_tooltip_text (
+                    ws.name != "" ? ws.name : "Рабочий стол %d".printf (ws.idx)
+                );
+                button.clicked.connect (() => {
+                    if (use_sway) {
+                        Sway.focus_workspace_on (null, ws.idx);
+                    } else {
+                        Hyprland.focus_workspace_on (null, ws.idx);
+                    }
+                    this.popdown ();
+                });
+
+                dots_box.append (button);
+            }
+        }
+
+        /* ------------------------------------------------------------------ */
+        /*  Wi-Fi                                                             */
+        /* ------------------------------------------------------------------ */
+        private Gtk.Widget build_wifi () {
+            var section = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
+            section.add_css_class ("wifi-section");
+
+            var heading = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 8);
+            heading.add_css_class ("menu-section-heading");
+
+            var icon = new Gtk.Label (Icons.get (Icons.WIFI));
+            icon.add_css_class ("section-icon");
+
+            var title = new Gtk.Label ("Wi-Fi");
+            title.add_css_class ("section-title");
+            title.set_halign (Gtk.Align.START);
+            title.set_hexpand (true);
+
+            heading.append (icon);
+            heading.append (title);
+            section.append (heading);
+
+            var row = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 8);
+            row.set_halign (Gtk.Align.FILL);
+
+            wifi_ssid = new Gtk.Label ("Wi-Fi");
+            wifi_ssid.add_css_class ("wifi-ssid");
+            wifi_ssid.set_halign (Gtk.Align.START);
+            wifi_ssid.set_hexpand (true);
+            wifi_ssid.set_ellipsize (Pango.EllipsizeMode.END);
+
+            wifi_signal = new Gtk.Label ("");
+            wifi_signal.add_css_class ("wifi-signal");
+            wifi_signal.set_halign (Gtk.Align.END);
+
+            row.append (wifi_ssid);
+            row.append (wifi_signal);
+            section.append (row);
+
+            wifi_internet = new Gtk.Label ("");
+            wifi_internet.add_css_class ("wifi-internet");
+            wifi_internet.set_halign (Gtk.Align.START);
+            section.append (wifi_internet);
+
+            var controls = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6);
+            wifi_toggle = new Gtk.Button ();
+            wifi_toggle.add_css_class ("wifi-toggle");
+            wifi_toggle.set_label ("Wi-Fi");
+            wifi_toggle.set_hexpand (false);
+            wifi_toggle.clicked.connect (() => {
+                bool on = !Wifi.radio_enabled ();
+                Wifi.set_radio (on);
+                GLib.Timeout.add_seconds (1, () => {
+                    refresh_wifi ();
+                    return GLib.Source.REMOVE;
+                });
+            });
+            controls.append (wifi_toggle);
+
+            var refresh_button = new Gtk.Button ();
+            refresh_button.add_css_class ("wifi-refresh");
+            refresh_button.set_label ("↻");
+            refresh_button.set_hexpand (false);
+            refresh_button.clicked.connect (() => refresh_wifi ());
+            controls.append (refresh_button);
+
+            section.append (controls);
+
+            return section;
+        }
+
+        private void refresh_wifi () {
+            if (!Wifi.is_available ()) {
+                wifi_ssid.set_text ("nmcli не найден");
+                wifi_signal.set_text ("");
+                wifi_internet.set_text ("");
+                wifi_toggle.set_sensitive (false);
+                return;
+            }
+
+            bool radio = Wifi.radio_enabled ();
+            wifi_toggle.set_label (radio ? "Отключить Wi-Fi" : "Включить Wi-Fi");
+            wifi_toggle.set_sensitive (true);
+
+            if (!radio) {
+                wifi_ssid.set_text ("Wi-Fi выключен");
+                wifi_signal.set_text ("");
+                wifi_internet.set_text ("");
+                return;
+            }
+
+            var info = Wifi.active_connection ();
+            if (info != null && info.ssid != "") {
+                wifi_ssid.set_text (info.ssid);
+                if (info.signal >= 0) {
+                    wifi_signal.set_text ("%d%%".printf (info.signal));
+                } else {
+                    wifi_signal.set_text ("");
+                }
+            } else {
+                wifi_ssid.set_text ("Не подключено");
+                wifi_signal.set_text ("");
+            }
+
+            if (Wifi.has_internet ()) {
+                wifi_internet.set_text ("Интернет: есть");
+                wifi_internet.remove_css_class ("wifi-no-inet");
+                wifi_internet.add_css_class ("wifi-ok");
+            } else {
+                wifi_internet.set_text ("Интернет: нет");
+                wifi_internet.remove_css_class ("wifi-ok");
+                wifi_internet.add_css_class ("wifi-no-inet");
+            }
+        }
+
+        /* ------------------------------------------------------------------ */
+        /*  Буфер обмена                                                      */
+        /* ------------------------------------------------------------------ */
+        private Gtk.Widget build_clipboard () {
+            var section = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
+            section.add_css_class ("clipboard-section");
+
+            var heading = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 8);
+            heading.add_css_class ("menu-section-heading");
+
+            var icon = new Gtk.Label (Icons.get (Icons.CLIPBOARD));
+            icon.add_css_class ("section-icon");
+
+            var title = new Gtk.Label ("Буфер обмена");
+            title.add_css_class ("section-title");
+            title.set_halign (Gtk.Align.START);
+            title.set_hexpand (true);
+
+            heading.append (icon);
+            heading.append (title);
+            section.append (heading);
+
+            clipboard_text = new Gtk.Label ("Читаю буфер…");
+            clipboard_text.add_css_class ("clipboard-text");
+            clipboard_text.set_halign (Gtk.Align.START);
+            clipboard_text.set_hexpand (true);
+            clipboard_text.set_valign (Gtk.Align.CENTER);
+            clipboard_text.set_wrap (true);
+            clipboard_text.set_wrap_mode (Pango.WrapMode.WORD_CHAR);
+            clipboard_text.set_lines (3);
+            clipboard_text.set_ellipsize (Pango.EllipsizeMode.END);
+            clipboard_text.set_selectable (true);
+            section.append (clipboard_text);
+
+            var controls = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6);
+
+            var refresh_button = new Gtk.Button ();
+            refresh_button.add_css_class ("clipboard-refresh");
+            refresh_button.set_label ("Обновить");
+            refresh_button.set_hexpand (false);
+            refresh_button.clicked.connect (() => read_clipboard ());
+            controls.append (refresh_button);
+
+            var clear_button = new Gtk.Button ();
+            clear_button.add_css_class ("clipboard-clear");
+            clear_button.set_label ("Очистить");
+            clear_button.set_hexpand (false);
+            clear_button.clicked.connect (() => {
+                SystemInfo.run_async ("wl-copy < /dev/null");
+                clipboard_text.set_text ("Очищено");
+            });
+            controls.append (clear_button);
+
+            section.append (controls);
+
+            return section;
+        }
+
+        private void read_clipboard () {
+            string? text = null;
+            try {
+                string out, err;
+                int status;
+                if (
+                    GLib.Process.spawn_command_line_sync (
+                        "wl-paste",
+                        out out,
+                        out err,
+                        out status
+                    ) && status == 0
+                ) {
+                    text = out;
+                }
+            } catch (GLib.Error e) {
+                text = null;
+            }
+
+            if (text == null || text == "") {
+                clipboard_text.set_text ("Буфер пуст");
+            } else {
+                string shown = text.replace ("\n", " ");
+                if (shown.length > 140) {
+                    shown = shown.substring (0, 140) + "…";
+                }
+                clipboard_text.set_text (shown);
+            }
+        }
+
+        /* ------------------------------------------------------------------ */
         /*  Сообщения                                                         */
         /* ------------------------------------------------------------------ */
         private Gtk.Widget build_messages () {
@@ -582,6 +976,9 @@ namespace ViaShell {
             logout_button.clicked.connect (() => {
                 if (Hyprland.is_hyprland_available ()) {
                     SystemInfo.run_async ("hyprctl dispatch exit");
+                }
+                else if (Sway.is_available ()) {
+                    SystemInfo.run_async ("swaymsg exit");
                 }
                 else if (Hyprland.is_niri_available ()) {
                     SystemInfo.run_async ("niri msg action quit");
