@@ -37,6 +37,21 @@ namespace ViaShell {
             }
         }
 
+        /*
+         * Акцентный цвет темы — используется для логотипа и чипов,
+         * чтобы при переключении на kanagawa/nordic/rose-pine не
+         * оставались цвета из catppuccin.
+         */
+        public string accent_color () {
+            switch (index) {
+                case 1: return "#7aa2f7"; // Tokyo Night
+                case 2: return "#7fb4ca"; // Kanagawa
+                case 3: return "#81a1c1"; // Nordic
+                case 4: return "#9ccfd8"; // Rosé Pine
+                default: return "#89b4fa"; // Catppuccin
+            }
+        }
+
         public ThemeManager () {
             load_state ();
             css_template = load_template ();
