@@ -65,6 +65,10 @@ namespace ViaShell {
         public const uint32 CHECK = 0xF012C;             // md-check
         public const uint32 PALETTE = 0xF03D8;           // md-palette
 
+        // Network
+        public const uint32 WIFI = 0xF05A9;             // mdi-wifi
+        public const uint32 CLIPBOARD = 0xF014C;        // mdi-clipboard-outline
+
         // Distributions
         public const uint32 DISTRO_VOID = 0xF32E;       // linux-void
         public const uint32 DISTRO_ARCH = 0xF303;       // linux-archlinux
