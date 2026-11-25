@@ -36,6 +36,8 @@ namespace ViaShell {
         private string last_state = "";
         private uint timer_id = 0;
 
+        private static bool use_sway = Sway.is_available ();
+
         public WorkspacesWidget (string? monitor_name) {
             Object (
                 orientation: Gtk.Orientation.VERTICAL,
@@ -46,7 +48,7 @@ namespace ViaShell {
             this.add_css_class ("workspaces");
             this.set_halign (Gtk.Align.CENTER);
 
-            build_buttons (Hyprland.is_niri_available () ? 3 : 10);
+            build_buttons (use_sway ? 10 : (Hyprland.is_niri_available () ? 3 : 10));
             refresh ();
 
             timer_id = GLib.Timeout.add (800, () => {
@@ -60,15 +62,23 @@ namespace ViaShell {
 
             scroll.scroll.connect ((dx, dy) => {
                 if (dy < 0) {
-                    Hyprland.focus_relative (-1);
+                    focus_relative (-1);
                 }
                 else if (dy > 0) {
-                    Hyprland.focus_relative (1);
+                    focus_relative (1);
                 }
 
                 return true;
             });
             this.add_controller (scroll);
+        }
+
+        private static void focus_relative (int delta) {
+            if (use_sway) {
+                Sway.focus_relative (delta);
+            } else {
+                Hyprland.focus_relative (delta);
+            }
         }
 
         private void build_buttons (int count) {
@@ -109,15 +119,27 @@ namespace ViaShell {
             }
 
             var ws = current[index];
-            Hyprland.focus_workspace_on (monitor_name, ws.idx);
+            if (use_sway) {
+                Sway.focus_workspace_on (monitor_name, ws.idx);
+            } else {
+                Hyprland.focus_workspace_on (monitor_name, ws.idx);
+            }
         }
 
         private void refresh () {
-            if (!Hyprland.is_available ()) {
-                return;
+            if (use_sway) {
+                if (!Sway.is_available ()) {
+                    return;
+                }
+            } else {
+                if (!Hyprland.is_available ()) {
+                    return;
+                }
             }
 
-            var list = Hyprland.get_workspaces (monitor_name, 10);
+            WorkspaceInfo[] list = use_sway
+                ? Sway.get_workspaces (monitor_name, 10)
+                : Hyprland.get_workspaces (monitor_name, 10);
             if (list.length == 0) {
                 return;
             }
